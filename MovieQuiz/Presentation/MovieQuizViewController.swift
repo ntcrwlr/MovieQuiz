@@ -42,8 +42,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
 
-    
-
     @IBAction private func Нет(_ sender: UIButton) {
         handleAnswer(false)
     }
@@ -58,16 +56,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
         
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-    }
-    
-
-    private func showCurrentQuestion() {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        let viewModel = convert(model: currentQuestion)
-        show(quiz: viewModel)
-        resetImageBorder()
     }
 
     private func show(quiz step: QuizStepViewModel) {
@@ -141,7 +129,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         alertPresenter.show(in: self, model: model)
     }
-
 
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         QuizStepViewModel(
