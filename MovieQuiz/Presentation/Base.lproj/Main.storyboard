@@ -74,7 +74,7 @@
                                                     </userDefinedRuntimeAttribute>
                                                 </userDefinedRuntimeAttributes>
                                                 <connections>
-                                                    <action selector="Нет:" destination="BYZ-38-t0r" eventType="touchUpInside" id="9ig-d1-z8K"/>
+                                                    <action selector="noButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="yQr-Db-Grv"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AYX-WV-emm">
@@ -91,7 +91,7 @@
                                                     </userDefinedRuntimeAttribute>
                                                 </userDefinedRuntimeAttributes>
                                                 <connections>
-                                                    <action selector="Да:" destination="BYZ-38-t0r" eventType="touchUpInside" id="I9U-im-rJX"/>
+                                                    <action selector="yesButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="nCz-m2-6Y1"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -107,16 +107,21 @@
                                     <constraint firstItem="0eh-Bb-pSp" firstAttribute="top" secondItem="Cf1-XE-wND" secondAttribute="bottom" constant="20" id="Vwq-CH-mbX"/>
                                 </constraints>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="zO9-8t-uDa">
+                                <rect key="frame" x="210" y="468" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black (iOS)"/>
                         <constraints>
                             <constraint firstItem="55m-9o-KGQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="48q-wg-CVA"/>
                             <constraint firstItem="w1b-Wh-giD" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="6d0-F4-r4B"/>
+                            <constraint firstItem="zO9-8t-uDa" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="8bL-GF-vvH"/>
                             <constraint firstItem="Qe6-zm-yQK" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="Evs-jS-bDH"/>
                             <constraint firstItem="Glw-qG-BGN" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="S0D-Lp-kW2"/>
                             <constraint firstItem="Qe6-zm-yQK" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="Sd8-40-Yid"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="0eh-Bb-pSp" secondAttribute="trailing" constant="20" id="aZ1-2I-ZZV"/>
+                            <constraint firstItem="zO9-8t-uDa" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="cC8-ZM-8VX"/>
                             <constraint firstItem="Glw-qG-BGN" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="fRf-Qk-zea"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Qe6-zm-yQK" secondAttribute="trailing" constant="20" id="iNH-CX-bul"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Glw-qG-BGN" secondAttribute="bottom" id="lrV-hE-7WU"/>
@@ -125,9 +130,12 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="вопрос" destination="5KJ-6F-NSI" id="yIV-Yq-Yxz"/>
-                        <outlet property="картинка" destination="0eh-Bb-pSp" id="t2K-WL-FEF"/>
-                        <outlet property="счетчик" destination="81m-5U-X6L" id="16T-Bf-rKl"/>
+                        <outlet property="activityIndicator" destination="zO9-8t-uDa" id="fTq-YD-C1g"/>
+                        <outlet property="countLabel" destination="81m-5U-X6L" id="b9j-RB-UJQ"/>
+                        <outlet property="imageView" destination="0eh-Bb-pSp" id="X6K-PE-WeS"/>
+                        <outlet property="noButton" destination="55m-9o-KGQ" id="8ot-Z3-dtj"/>
+                        <outlet property="questionLabel" destination="5KJ-6F-NSI" id="Tab-0S-aff"/>
+                        <outlet property="yesButton" destination="AYX-WV-emm" id="he4-oo-gJY"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
