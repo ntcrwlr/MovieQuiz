@@ -13,11 +13,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Private Properties
     
-    private var currentQuestionIndex = 0
     private var correctAnswers = 0
     private var questionFactory: QuestionFactoryProtocol?
-    private let questionsAmount: Int = 10
     private var currentQuestion: QuizQuestion?
+    private let presenter = MovieQuizPresenter()
     
     // MARK: - Dependencies
     
@@ -33,7 +32,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         statisticService = StatisticService()
 
         showLoadingIndicator()
-        setAnswerButtonsEnabled(false)
+        setAnswerButtonsEnabled(false) // закомментировано по просьбе
         questionFactory?.loadData()
     }
     
@@ -46,7 +45,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
         
         currentQuestion = question
-        let viewModel = convert(model: question)
+        let viewModel = presenter.convert(model: question)
         
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -61,8 +60,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         // Data loaded successfully; hide spinner and request the first question
         hideLoadingIndicator()
         questionFactory?.reset()
-        // Перед запросом следующего вопроса — выключаем кнопки
-        setAnswerButtonsEnabled(false)
+        setAnswerButtonsEnabled(false) // закомментировано по просьбе
         questionFactory?.requestNextQuestion()
     }
     
@@ -84,7 +82,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Private Methods: Setup
     
     private func setupQuestionFactory() {
-        // Use the designated initializer that matches your implementation
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
     }
     
@@ -96,7 +93,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
         
         // Сразу блокируем кнопки, чтобы избежать дабл-кликов
-        setAnswerButtonsEnabled(false)
+        setAnswerButtonsEnabled(false) // закомментировано по просьбе
         
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
@@ -118,18 +115,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showNextQuestionOrResults() {
-        if currentQuestionIndex == questionsAmount - 1 {
+        if presenter.isLastQuestion() {
             finishGame()
         } else {
-            currentQuestionIndex += 1
-            // Перед запросом следующего вопроса — выключаем кнопки
-            setAnswerButtonsEnabled(false)
+            presenter.switchToNextQuestion()
+            setAnswerButtonsEnabled(false) // закомментировано по просьбе
             questionFactory?.requestNextQuestion()
         }
     }
     
     private func finishGame() {
-        statisticService.store(correct: correctAnswers, total: questionsAmount)
+        statisticService.store(correct: correctAnswers, total: presenter.questionsAmount)
         
         let text = makeResultsMessage()
         let viewModel = QuizResultsViewModel(
@@ -146,7 +142,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let gamesCount = statisticService.gamesCount
         
         let resultMessage = """
-        Ваш результат: \(correctAnswers)/\(questionsAmount)
+        Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)
         Количество сыгранных квизов: \(gamesCount)
         Рекорд: \(bestGame.correct)/\(bestGame.total) (\(bestGame.date.dateTimeString))
         Средняя точность: \(accuracy)%
@@ -162,12 +158,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             buttonText: result.buttonText
         ) { [weak self] in
             guard let self = self else { return }
-            
-            self.currentQuestionIndex = 0
+            // Сброс и запуск нового раунда
+            self.presenter.resetQuestionIndex()
             self.correctAnswers = 0
             self.questionFactory?.reset()
-            // Перед новой загрузкой — выключаем кнопки
-            self.setAnswerButtonsEnabled(false)
+            self.setAnswerButtonsEnabled(false) // закомментировано по просьбе
             self.questionFactory?.requestNextQuestion()
         }
         
@@ -191,13 +186,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                                message: message,
                                buttonText: "Попробовать еще раз") { [weak self] in
             guard let self = self else { return }
-            
-            self.currentQuestionIndex = 0
+            self.presenter.resetQuestionIndex()
             self.correctAnswers = 0
             
             self.showLoadingIndicator()
-            // Перед перезагрузкой — выключаем кнопки
-            self.setAnswerButtonsEnabled(false)
+            self.setAnswerButtonsEnabled(false) // закомментировано по просьбе
             self.questionFactory?.loadData()
         }
         
@@ -218,16 +211,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.layer.cornerRadius = 20
     }
     
-    // MARK: - Private Methods: Data Conversion
-    
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
-            question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)"
-        )
-    }
-    
     // MARK: - Private Methods: Buttons State
     
     private func setAnswerButtonsEnabled(_ isEnabled: Bool) {
@@ -237,4 +220,3 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         noButton.alpha = isEnabled ? 1.0 : 0.5
     }
 }
-
