@@ -15,7 +15,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private var correctAnswers = 0
     private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion?
     private let presenter = MovieQuizPresenter()
     
     // MARK: - Dependencies
@@ -27,6 +26,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        presenter.viewController = self
         setupQuestionFactory()
         imageView.layer.cornerRadius = 20
         statisticService = StatisticService()
@@ -39,21 +39,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - QuestionFactoryDelegate
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {
-            // В случае ошибки не включаем кнопки, пока пользователь не перезапустит загрузку через алерт
-            return
-        }
-        
-        currentQuestion = question
-        let viewModel = presenter.convert(model: question)
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.show(quiz: viewModel)
-            self.resetImageBorder()
-            // После отображения свежих данных — включаем кнопки
-            self.setAnswerButtonsEnabled(true)
-        }
+        presenter.didReceiveNextQuestion(question: question)
+        setAnswerButtonsEnabled(true)
+        resetImageBorder()
     }
     
     func didLoadDataFromServer() {
@@ -72,11 +60,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Actions
     
     @IBAction private func noButton(_ sender: UIButton) {
-        handleAnswer(false)
+        presenter.noButtonClicked()
+        setAnswerButtonsEnabled(false)
     }
     
     @IBAction private func yesButton(_ sender: UIButton) {
-        handleAnswer(true)
+        presenter.yesButtonClicked()
+        setAnswerButtonsEnabled(false)
     }
     
     // MARK: - Private Methods: Setup
@@ -87,18 +77,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Private Methods: Game Logic
     
-    private func handleAnswer(_ givenAnswer: Bool) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        
-        // Сразу блокируем кнопки, чтобы избежать дабл-кликов
-        setAnswerButtonsEnabled(false) // закомментировано по просьбе
-        
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-    }
-    
-    private func showAnswerResult(isCorrect: Bool) {
+    func showAnswerResult(isCorrect: Bool) {
         if isCorrect {
             correctAnswers += 1
         }
@@ -109,8 +88,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.layer.cornerRadius = 20
         
         // Кнопки остаются выключенными до загрузки следующего вопроса
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            self?.showNextQuestionOrResults()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                        guard let self = self else { return }
+                        self.presenter.correctAnswers = self.correctAnswers
+                        self.presenter.questionFactory = self.questionFactory
+                        self.presenter.showNextQuestionOrResults()
+                
         }
     }
     
@@ -151,7 +134,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         return resultMessage
     }
     
-    private func show(quiz result: QuizResultsViewModel) {
+    func show(quiz result: QuizResultsViewModel) {
         let model = AlertModel(
             title: result.title,
             message: result.text,
@@ -199,7 +182,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Private Methods: UI Updates
     
-    private func show(quiz step: QuizStepViewModel) {
+    func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         questionLabel.text = step.question
         countLabel.text = step.questionNumber
@@ -213,7 +196,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Private Methods: Buttons State
     
-    private func setAnswerButtonsEnabled(_ isEnabled: Bool) {
+   private func setAnswerButtonsEnabled(_ isEnabled: Bool) {
         yesButton.isEnabled = isEnabled
         noButton.isEnabled = isEnabled
         yesButton.alpha = isEnabled ? 1.0 : 0.5
